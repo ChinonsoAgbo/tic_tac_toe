@@ -20,6 +20,10 @@ class GameViewModel(
     private var isGameEnding: Boolean = false
 ): ViewModel() {
 
+    // StateFlow for the Gamemodel
+    private val _gameModel = MutableStateFlow(GameModel())
+    val gameModel: StateFlow<GameModel> = _gameModel.asStateFlow()
+
     /**
      * Represents the game field as a 2D array of Fields.
      */
@@ -31,15 +35,12 @@ class GameViewModel(
                     }
         }
     )
-
     val gameViewModelField: StateFlow<List<List<Field>>> = _gameViewModelField.asStateFlow()
-
-
 /**
  * Resetting the Game
  * Code requirement
-  * In HomeScreen.kt TODO beachten
-   *In MainActivity.kt TODO beachten
+  *TODO In HomeScreen.kt  beachten
+   * TODO In MainActivity.ktbeachten
  *
  **/
 fun resetGame() {
@@ -51,12 +52,10 @@ fun resetGame() {
     _gameViewModelField.value = resetGameField
 }
 
-
-
     /**
      * Code requirement
-     * Hier besteht die Aufgabe darin, die Aktiverung der Boxen zu implementieren.
-     * In HomeScreen.kt TODO beachten
+     *  Aufgabe: Hier besteht die Aufgabe darin, die Aktiverung der Boxen zu implementieren.
+     * TODO In HomeScreen.kt beachten
      */
     fun selectField(field: Field) {
 
@@ -69,16 +68,28 @@ fun resetGame() {
         // Update the game Viewmodel
         _gameViewModelField.value = updatedField
         //Change the currentPlayer for the next player
+
         currentPlayer = currentPlayer.next()
 
-    }
 
-    // Hier werden die Spalten, Reihen und Diagonalen überprüft und das Game beendet, falls ein Spieler gewonnen hat.
+
+
+    }
+    /**
+     * Checks the game state to determine if it has reached a conclusion, either due to a player winning .
+     * Updates the game model state accordingly.
+     * !!! The state of Draw is not determined
+     * This method examines the rows, columns, and diagonals of the game field to identify a winning player.
+     * If a winner is found, the winning player is updated, and the game is marked as ending.
+     * The updated game state is then reflected in the [_gameModel] state flow.
+     * TODO Hier werden die Spalten, Reihen und Diagonalen überprüft und das Game beendet, falls ein Spieler gewonnen hat.
+     */
+
     fun checkEndingGame(){
 
         val grid = _gameViewModelField.value
 
-         fun checkRows(): Status? {
+        fun checkRows(): Status? {
             for (row in grid) {
                 if (row.all { it.status == Status.PlayerX }) {
                     return Status.PlayerX
@@ -89,6 +100,7 @@ fun resetGame() {
             return null
         }
 
+        Log.e("CheckRow",checkRows().toString())
         fun checkColumns(): Status? {
             for (col in grid[0].indices) {
                 if (grid.all { it[col].status == Status.PlayerX }) {
@@ -100,7 +112,7 @@ fun resetGame() {
             return null
         }
 
-         fun checkDiagonals(): Status? {
+        fun checkDiagonals(): Status? {
             if (grid[0][0].status == grid[1][1].status && grid[1][1].status == grid[2][2].status) {
                 return grid[0][0].status
             } else if (grid[0][2].status == grid[1][1].status && grid[1][1].status == grid[2][0].status) {
@@ -109,37 +121,21 @@ fun resetGame() {
             return null
         }
 
+
         val winner = checkRows() ?: checkColumns() ?: checkDiagonals()
 
+
         if (winner != null) {
+            // Update the winningPlayer property and set isGameEnding to true
+            winningPlayer = winner
             isGameEnding = true
+            Log.e("winner",winningPlayer.toString())
 
-            // Update the status of each Field in the winning line
-            when (winner) {
-                Status.PlayerX -> updateFieldStatus(grid, checkWinningRow(grid, Status.PlayerX), Status.PlayerX)
-                Status.PlayerO -> updateFieldStatus(grid, checkWinningRow(grid, Status.PlayerO), Status.PlayerO)
-                else -> {}
-            }
         }
+          // Update the _gameModel state
+        _gameModel.value = GameModel(currentPlayer, winningPlayer, isGameEnding)
+
     }
-        // update the winnerstate
 
 
- private fun updateFieldStatus(grid: List<List<Field>>, winningLine: List<Pair<Int, Int>>, winner: Status) {
-    val updatedField = _gameViewModelField.value.toMutableList().map { it.toMutableList() }
-    for ((col, row) in winningLine) {
-        updatedField[col][row].status = winner
-    }
-    _gameViewModelField.value = updatedField
-}
-
- private fun checkWinningRow(grid: List<List<Field>>, player: Status): List<Pair<Int, Int>> {
-     for (row in grid.indices) {
-         if (grid[row].all { it.status == player }) {
-             // Return the indices of the winning row
-             return List(grid[row].size) { col -> Pair(row, col) }
-         }
-     }
-     return emptyList()
-}
 }

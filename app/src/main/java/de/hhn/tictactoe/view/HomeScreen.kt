@@ -37,12 +37,13 @@ import kotlinx.coroutines.flow.forEach
 @Composable
 fun HomeScreen(viewModel: GameViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
     // currentGame, gameField are Dummy data
-    val currentGame = GameModel()
+//    val currentGame = GameModel()
 //    val gameField =  Array(3) {
 //        Array(3) {
 //            Field()
 //        }
 //    }
+    val currentGame by viewModel.gameModel.collectAsState()
 
     val gameField by viewModel.gameViewModelField.collectAsState()
 
@@ -150,7 +151,7 @@ fun HomeScreen(viewModel: GameViewModel = androidx.lifecycle.viewmodel.compose.v
                 ) {
                     viewModel.checkEndingGame()
 
-                    Log.e("winner","$winningPlayer" )
+                    // Log.e("winner","$winningPlayer" )
                     if (isGameEnding) {
 
                         Text(

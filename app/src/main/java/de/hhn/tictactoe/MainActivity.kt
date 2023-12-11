@@ -43,6 +43,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                   val  viewModel :GameViewModel =  androidx.lifecycle.viewmodel.compose.viewModel()
+
                     Scaffold(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -72,6 +73,7 @@ class MainActivity : ComponentActivity() {
                                 navigationIcon = {
                                     IconButton(
                                         onClick = {
+                                            viewModel.resetGame()
 
                                         }
                                     ) {
